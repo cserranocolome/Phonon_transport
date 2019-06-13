@@ -10,3 +10,6 @@ ballistic2d.py: code for the ballistic regime in a two-dimensional domain.
 diffusive1d.py: code for the diffusive regime in a one-dimensional domain.
 
 diffusive2d.py: code for the diffusive regime in a two-dimensional domain.
+
+mean_free_path.py: code to compute the mean free path of the phonons.
+
