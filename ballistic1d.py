@@ -187,16 +187,12 @@ while k<k_max:
     cel = xyz//L
     
     for i in range(N):
-        f=0
         
         if(cel[i]>(n2y+1) or cel[i]<0):
             xdelete = np.append(xdelete,i)
         else:
             Nvec[cel[i]] = Nvec[cel[i]]+1 
-            if(cel[i]==(n2y+1)):
-                index1 = np.append(index1,i)
-            if(cel[i]==0):
-                index3 = np.append(index3,i)
+            
         
        
     N1k = int(Nvec[n2y+1])
@@ -207,7 +203,14 @@ while k<k_max:
     wvector = np.delete(wvector, xdelete)
     Energies = np.delete(Energies, xdelete)
     N = N - len(xdelete)
-        
+    
+    cel = xyz//L
+    for i in range(N):
+        if(cel[i]==(n2y+1)):
+            index1 = np.append(index1,i)
+        if(cel[i]==0):
+            index3 = np.append(index3,i)
+            
         #Energy conservation
 
     if(N1k<N1):
@@ -229,11 +232,12 @@ while k<k_max:
     
     if(N1k>N1):
         for i in range(N1k-N1): 
-            xdelete = np.append(xdelete,index1[i])
-        xyz = np.delete(xyz,xdelete)
-        v = np.delete(v,xdelete)
-        times = np.delete(times,xdelete)
-        N = N-len(xdelete)
+            ind = random.randint(0,len(index1)-1)
+            xyz = np.delete(xyz,index1[ind])
+            v = np.delete(v,index1[ind])
+            times = np.delete(times,index1[ind])
+            N = N-1
+            index1 = np.delete(index1, ind)
     
     for j in range(n3):
 
@@ -256,11 +260,13 @@ while k<k_max:
             
         if(N3k>N3):
             for i in range(N3k-N3): 
-                xdelete = np.append(xdelete,index3[i])
-            xyz = np.delete(xyz,xdelete)
-            v = np.delete(v,xdelete)
-            times = np.delete(times,xdelete)
-            N = N-len(xdelete)
+                ind = random.randint(0,len(index3)-1)
+                xyz = np.delete(xyz,index3[ind])
+                v = np.delete(v,index3[ind])
+                times = np.delete(times,index3[ind])
+                N = N-1
+                index3 = np.delete(index3, ind)
+            
             
         #Temperature of each subcell
     Ts2 = [0.0]*(n2y+2)

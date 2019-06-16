@@ -37,14 +37,14 @@ wmin = 0
 #Time step
 dt = L/vg
 #Constant by which we devide the number of phonons
-C = 10
+C = 100
 
 
 #Ntemp = np.load('Ntemp250_700.npy')
 #Temp = np.load('Temp250_700.npy')
 
-Ntemp = np.load('Ntemp30000_60000.npy')
-Temp = np.load('Temp30000_60000.npy')
+Ntemp = np.load('Ntemp750_700.npy')
+Temp = np.load('Temp750_700.npy')
 
 #Ntemp = np.load('Ntemp340000_550000.npy')
 #Temp = np.load('Temp340000_550000.npy')
@@ -146,6 +146,7 @@ if(contar_flux==1):
 
 k_max = 500
 while k<k_max:
+    print(k)
     xyz = xyz + v*dt
     xdelete = np.array([]) #index of the phonons we will delete in the y boundaries
         #boundaries
@@ -187,16 +188,11 @@ while k<k_max:
     cel = xyz//L
     
     for i in range(N):
-        f=0
         
         if(cel[i]>(n2y+1) or cel[i]<0):
             xdelete = np.append(xdelete,i)
         else:
-            Nvec[cel[i]] = Nvec[cel[i]]+1 
-            if(cel[i]==(n2y+1)):
-                index1 = np.append(index1,i)
-            if(cel[i]==0):
-                index3 = np.append(index3,i)
+            Nvec[int(cel[i])] = Nvec[int(cel[i])]+1 
         
        
     N1k = int(Nvec[n2y+1])
@@ -208,6 +204,13 @@ while k<k_max:
     Energies = np.delete(Energies, xdelete)
     N = N - len(xdelete)
     
+    cel = xyz//L
+    for i in range(N):
+        if(cel[i]==(n2y+1)):
+            index1 = np.append(index1,i)
+        if(cel[i]==0):
+            index3 = np.append(index3,i)
+                
     #Scattering
     Ps = 1.0-np.exp(-(A*wvector**4+B*wvector**2*Tmean**3)*times)  
     for i in range(N):
@@ -224,7 +227,8 @@ while k<k_max:
         v1 = [0.0]*(N1-N1k)
         times1 = [0.0]*(N1-N1k)
         for i in range(N1-N1k):
-            xyz1[i]=L*(1+n2y+np.random.uniform(0,1))
+            #xyz1[i]=L*(1+n2y+np.random.uniform(0,1))
+            xyz1[i]=L*(1.5+n2y)
             theta = np.arccos(2*np.random.uniform(0,1)-1)
             phi = 2.0*np.pi*np.random.uniform(0,1)
             v1[i] = vg*np.sin(theta)*np.cos(phi)
@@ -233,27 +237,26 @@ while k<k_max:
         xyz = np.append(xyz,xyz1)
         v = np.append(v,v1)
         times = np.append(times,times1)
-    xdelete = np.array([])
 
     
     if(N1k>N1):
         for i in range(N1k-N1): 
-            xdelete = np.append(xdelete,index1[i])
-        xyz = np.delete(xyz,xdelete)
-        v = np.delete(v,xdelete)
-        times = np.delete(times,xdelete)
-        N = N-len(xdelete)
+            ind = random.randint(0,len(index1)-1)
+            xyz = np.delete(xyz,index1[ind])
+            v = np.delete(v,index1[ind])
+            times = np.delete(times,index1[ind])
+            N = N-1
+            index1 = np.delete(index1, ind)
     
     for j in range(n3):
-
-        xdelete = np.array([])
 
         if(N3k<N3):
             xyz1 = [0.0]*(N3-N3k)
             v1 = [0.0]*(N3-N3k)
             times1 = [0.0]*(N3-N3k)
             for i in range(N3-N3k):
-                xyz1[i]=L*np.random.uniform(0,1)
+                #xyz1[i]=L*np.random.uniform(0,1)
+                xyz1[i]=0.5*L
                 theta = np.arccos(2*np.random.uniform(0,1)-1)
                 phi = 2.0*np.pi*np.random.uniform(0,1)
                 v1[i] = vg*np.sin(theta)*np.cos(phi)
@@ -265,11 +268,12 @@ while k<k_max:
             
         if(N3k>N3):
             for i in range(N3k-N3): 
-                xdelete = np.append(xdelete,index3[i])
-            xyz = np.delete(xyz,xdelete)
-            v = np.delete(v,xdelete)
-            times = np.delete(times,xdelete)
-            N = N-len(xdelete)
+                ind = random.randint(0,len(index3)-1)
+                xyz = np.delete(xyz,index3[ind])
+                v = np.delete(v,index3[ind])
+                times = np.delete(times,index3[ind])
+                N = N-1
+                index3 = np.delete(index3, ind)
             
         #Temperature of each subcell
     Ts2 = [0.0]*(n2y+2)
@@ -278,11 +282,25 @@ while k<k_max:
     Ts2[0] = T1
     Ns2 = np.array(Ns2)
     
+    cel = xyz//L
+    N1prova = 0
+    N3prova = 0
+    for i in range(N):
+        if(cel[i]==(n2y+1)):
+            N1prova = N1prova + 1
+        if(cel[i]==0):
+            N3prova = N3prova + 1
+    
     for j in range(n2y):
         Ns2[j] = Nvec[n2y-j]
         m = abs(Ntemp-Ns2[j])
         Ts2[j+1] = Temp[np.where(m == m.min())]
         
+    m = abs(Ntemp-N1prova)        
+    print(Temp[np.where(m == m.min())])
+    m = abs(Ntemp-N3prova)        
+    print(Temp[np.where(m == m.min())])
+    
     Ts2[n2y+1]=T3
     
     
