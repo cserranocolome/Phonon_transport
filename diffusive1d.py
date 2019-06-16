@@ -37,14 +37,17 @@ wmin = 0
 #Time step
 dt = L/vg
 #Constant by which we devide the number of phonons
-C = 100
+C = 10
 
 
 #Ntemp = np.load('Ntemp250_700.npy')
 #Temp = np.load('Temp250_700.npy')
 
-Ntemp = np.load('Ntemp750_700.npy')
-Temp = np.load('Temp750_700.npy')
+Ntemp = np.load('Ntemp30000_60000.npy')
+Temp = np.load('Temp30000_60000.npy')
+
+#Ntemp = np.load('Ntemp750_700.npy')
+#Temp = np.load('Temp750_700.npy')
 
 #Ntemp = np.load('Ntemp340000_550000.npy')
 #Temp = np.load('Temp340000_550000.npy')
