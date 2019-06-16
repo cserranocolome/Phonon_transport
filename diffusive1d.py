@@ -12,9 +12,9 @@ import time
 #from mpl_toolkits.mplot3d import Axes3D
 
 #Initial temperatures
-T1 = 300
-T2 = 250
-T3 = 250
+T1 = 750
+T2 = 700
+T3 = 700
 Tmean = (T1+T3)/2
 #Dimensions of the surface
 L = 1.0e-8
@@ -37,17 +37,14 @@ wmin = 0
 #Time step
 dt = L/vg
 #Constant by which we devide the number of phonons
-C = 10
+C = 100
 
 
 #Ntemp = np.load('Ntemp250_700.npy')
 #Temp = np.load('Temp250_700.npy')
 
-Ntemp = np.load('Ntemp30000_60000.npy')
-Temp = np.load('Temp30000_60000.npy')
-
-#Ntemp = np.load('Ntemp750_700.npy')
-#Temp = np.load('Temp750_700.npy')
+Ntemp = np.load('Ntemp750_700.npy')
+Temp = np.load('Temp750_700.npy')
 
 #Ntemp = np.load('Ntemp340000_550000.npy')
 #Temp = np.load('Temp340000_550000.npy')
@@ -137,7 +134,7 @@ times = [0]*int(N)
 times = np.array(times)
 Et = np.array([]) #Energy vs t
 
-Tcell_list= np.array([[300,250,250,250,250,250,250]])
+Tcell_list= np.array([[750,700,700,700,700,700,700]])
 
 contar=0
 contar_flux=0
@@ -147,7 +144,7 @@ if(contar_flux==1):
     vf=open("Flux2_t.txt","w")
     
 
-k_max = 500
+k_max = 100
 while k<k_max:
     print(k)
     xyz = xyz + v*dt
@@ -215,7 +212,7 @@ while k<k_max:
             index3 = np.append(index3,i)
                 
     #Scattering
-    Ps = 1.0-np.exp(-(A*wvector**4+B*wvector**2*Tmean**3)*times)  
+    Ps = 1.0-np.exp(-(A*wvector**4+B*wvector**2*Tmean**3)*times*10)  
     for i in range(N):
         if(np.random.uniform(0,1)<Ps[i]):
             phi = 2.0*np.pi*np.random.uniform(0,1)
@@ -225,58 +222,41 @@ while k<k_max:
         
         #Energy conservation
 
-    if(N1k<N1):
-        xyz1 = [0.0]*(N1-N1k)
-        v1 = [0.0]*(N1-N1k)
-        times1 = [0.0]*(N1-N1k)
-        for i in range(N1-N1k):
-            #xyz1[i]=L*(1+n2y+np.random.uniform(0,1))
-            xyz1[i]=L*(1.5+n2y)
+    indext = np.append(index1,index3)
+    xyz = np.delete(xyz,indext)
+    v = np.delete(v,indext)
+    times = np.delete(times, indext)
+    N = N-len(indext)
+    
+    xyz1 = [0.0]*N1
+    v1 = [0.0]*N1
+    for i in range(N1):
+            xyz1[i]=L*(1+n2y+np.random.uniform(0,1))
+            #xyz1[i]=L*(1.5+n2y)
             theta = np.arccos(2*np.random.uniform(0,1)-1)
             phi = 2.0*np.pi*np.random.uniform(0,1)
             v1[i] = vg*np.sin(theta)*np.cos(phi)
             N = N+1
-
-        xyz = np.append(xyz,xyz1)
-        v = np.append(v,v1)
-        times = np.append(times,times1)
-
-    
-    if(N1k>N1):
-        for i in range(N1k-N1): 
-            ind = random.randint(0,len(index1)-1)
-            xyz = np.delete(xyz,index1[ind])
-            v = np.delete(v,index1[ind])
-            times = np.delete(times,index1[ind])
-            N = N-1
-            index1 = np.delete(index1, ind)
-    
-    for j in range(n3):
-
-        if(N3k<N3):
-            xyz1 = [0.0]*(N3-N3k)
-            v1 = [0.0]*(N3-N3k)
-            times1 = [0.0]*(N3-N3k)
-            for i in range(N3-N3k):
-                #xyz1[i]=L*np.random.uniform(0,1)
-                xyz1[i]=0.5*L
-                theta = np.arccos(2*np.random.uniform(0,1)-1)
-                phi = 2.0*np.pi*np.random.uniform(0,1)
-                v1[i] = vg*np.sin(theta)*np.cos(phi)
-                N = N+1
             
-            xyz = np.append(xyz,xyz1)
-            v = np.append(v,v1)
-            times = np.append(times,times1)
-            
-        if(N3k>N3):
-            for i in range(N3k-N3): 
-                ind = random.randint(0,len(index3)-1)
-                xyz = np.delete(xyz,index3[ind])
-                v = np.delete(v,index3[ind])
-                times = np.delete(times,index3[ind])
-                N = N-1
-                index3 = np.delete(index3, ind)
+    xyz3 = [0.0]*N3
+    v3 = [0.0]*N3
+    for i in range(N3):
+            xyz3[i]=L*np.random.uniform(0,1)
+            #xyz1[i]=L*(1.5+n2y)
+            theta = np.arccos(2*np.random.uniform(0,1)-1)
+            phi = 2.0*np.pi*np.random.uniform(0,1)
+            v3[i] = vg*np.sin(theta)*np.cos(phi)
+            N = N+1
+    
+    xyz = np.append(xyz, xyz1)
+    xyz = np.append(xyz, xyz3)
+    
+    v = np.append(v, v1)
+    v = np.append(v, v3)
+    
+    times1 = [0.0]*(N1+N3)
+    times = np.append(times, times1)
+    
             
         #Temperature of each subcell
     Ts2 = [0.0]*(n2y+2)
@@ -291,6 +271,7 @@ while k<k_max:
         Ns2[j] = Nvec[n2y-j]
         m = abs(Ntemp-Ns2[j])
         Ts2[j+1] = Temp[np.where(m == m.min())]
+        
     
     Ts2[n2y+1]=T3
     
@@ -341,6 +322,7 @@ while k<k_max:
         vf.write("%f "%N3kT) 
         vf.write("\n")
           
+    
     Tcell_list= np.append(Tcell_list, [Ts2], 0)   
     times = times + dt
     k = k+1
@@ -352,6 +334,7 @@ if(contar_flux==1):
     vf.close()
 
 
+np.save("Tcell", Tcell_list)
 
 vf = open("Def_dif_8.txt", "w")
 for i in range(len(Tcell_list[0])):

@@ -12,12 +12,12 @@ import time
 #from mpl_toolkits.mplot3d import Axes3D
 
 #Initial temperatures
-T1 = 300
-T2 = 250
-T3 = 250
+T1 = 750
+T2 = 700
+T3 = 700
 Tmean = (T1+T3)/2
 #Dimensions of the surface
-L = 10e-7
+L = 1e-8
 n1 = 1
 n2x = 5
 n2y = 5
@@ -30,18 +30,18 @@ kb = 1.38e-23
 A = 1.5e-44   #scattering constant 
 B =2.0e-23    #scattering constant
 #Modulo of the phonons' velocity
-vg = 8000  
+vg = 2000  
 #Debye's frequency
 wD = 1e14 
 #Time step
 dt = L/vg
 #Constant by which we devide the number of phonons
-C = 1e7
+C = 100
 
 
 
-Ntemp = np.load('Ntemp350_1300.npy')
-Temp = np.load('Temp350_1300.npy')
+Ntemp = np.load('Ntemp750_700.npy')
+Temp = np.load('Temp750_700.npy')
 
 #Number of phonons in each cell 
 def functionN(w,T):
@@ -119,10 +119,10 @@ times = np.array(times)
 Et = np.array([]) #Energy vs t
 Tp = np.array([np.zeros((n2x, n2y))])
 
-k_max=5001
-keq=1999
+k_max=500
 
 while k<k_max:
+    print(k)
     xyz = xyz + v*dt
     xdelete = np.array([]) #index of the phonons we will delete in the y boundaries
         #boundaries
@@ -164,7 +164,7 @@ while k<k_max:
     N = N - len(xdelete)
     
         #scattering
-    Ps = 1-np.exp(-(A*wvector**4+B*wvector**2*Tmean**3)*times)  
+    Ps = 1-np.exp(-(A*wvector**4+B*wvector**2*Tmean**3)*times*10)  
 
     for i in range(N):
         if(np.random.uniform(0,1)<Ps[i]):
@@ -173,61 +173,59 @@ while k<k_max:
             v[i] = [vg*np.cos(phi)*np.sin(theta), vg*np.sin(phi)*np.sin(theta), vg*np.cos(theta)]
             times[i] = 0
         #Energy conservation
+    index1 = np.array([])
+    index3 = np.array([])
     
-    index = np.array([])
-    xdelete = np.array([])
-    N1k = 0        #Hot cell
+    cel = xyz//L
     for i in range(N):
-        if(xyz[i][0]<L and xyz[i][1]>(1+n2y)*L):
-            index = np.append(index,i)
-            N1k = N1k+1
+        if(cel[i][1]==(n2y+1)):
+            index1 = np.append(index1,i)
+        if(cel[i][1]==0):
+            index3 = np.append(index3,i)
+            
 
-    if(N1k<N1):
-        for i in range(N1-N1k):
-            xyz = np.append(xyz,[[ np.random.uniform(0,1)*L, L*(1+n2y+np.random.uniform(0,1)), np.random.uniform(0,1)*L]],0)
-            phi = 2*np.pi*np.random.uniform(0,1)
+    indext = np.append(index1,index3)
+    xyz = np.delete(xyz,indext,0)
+    v = np.delete(v,indext,0)
+    times = np.delete(times, indext)
+    N = N-len(indext)
+    
+    xyz1 = [[0,0,0]]*int(N1)
+    v1 = [[0,0,0]]*N1
+    for i in range(N1):
+            xyz1[i]=[ np.random.uniform(0,1)*L, L*(1+n2y+np.random.uniform(0,1)), np.random.uniform(0,1)*L]
             theta = np.arccos(2*np.random.uniform(0,1)-1)
-            v = np.append(v,[[vg*np.cos(phi)*np.sin(theta), vg*np.sin(phi)*np.sin(theta), vg*np.cos(theta)]],0)
-            times = np.append(times, 0)
+            phi = 2.0*np.pi*np.random.uniform(0,1)
+            v1[i] = [vg*np.cos(phi)*np.sin(theta), vg*np.sin(phi)*np.sin(theta), vg*np.cos(theta)]
             N = N+1
-    if(N1k>N1):
-        for i in range(N1k-N1): 
-            xdelete = np.append(xdelete,index[i])
-        xyz = np.delete(xyz,xdelete,0)
-        v = np.delete(v,xdelete,0)
-        times = np.delete(times,xdelete)
-        N = N-len(xdelete)
-
+            
+    xyz3 = [[0,0,0]]*N3*n3
+    v3 = [[0,0,0]]*N3*n3
+    p=0
     for j in range(n3):
-        N3k = 0        #Cold cell
-        index = np.array([])
-        xdelete = np.array([])
-        for i in range(N):
-            if(xyz[i][1]<L and L*j<xyz[i][0]<(L*(j+1))):
-                index = np.append(index,i)
-                N3k = N3k+1
-
-        if(N3k<N3):
-            for i in range(N3-N3k):
-            	xyz = np.append(xyz,[[L*(j+np.random.uniform(0,1)) , L*np.random.uniform(0,1), np.random.uniform(0,1)*L]],0)
-                phi = 2*np.pi*np.random.uniform(0,1)
-                theta = np.arccos(2*np.random.uniform(0,1)-1)
-                v = np.append(v,[[vg*np.cos(phi)*np.sin(theta), vg*np.sin(phi)*np.sin(theta), vg*np.cos(theta)]],0)
-                times = np.append(times, 0)
-                N = N+1
-        if(N3k>N3):
-            for i in range(N3k-N3): 
-                xdelete = np.append(xdelete,index[i])
-            xyz = np.delete(xyz,xdelete,0)
-            v = np.delete(v,xdelete,0)
-            times = np.delete(times,xdelete)
-            N = N-len(xdelete)
+        for i in range(int(N3)): 
+            xyz3[p]=[L*(j+np.random.uniform(0,1)) , L*np.random.uniform(0,1), np.random.uniform(0,1)*L]
+            theta = np.arccos(2*np.random.uniform(0,1)-1)
+            phi = 2.0*np.pi*np.random.uniform(0,1)
+            v3[p] = [vg*np.cos(phi)*np.sin(theta), vg*np.sin(phi)*np.sin(theta), vg*np.cos(theta)]
+            N = N+1
+            p = p+1
+    
+    xyz = np.append(xyz, xyz1,0)
+    xyz = np.append(xyz, xyz3,0)
+    
+    v = np.append(v, v1,0)
+    v = np.append(v, v3,0)
+    
+    times1 = [0.0]*(N1+N3*n3)
+    times = np.append(times, times1)
+    
         #Temperature of each subcell
     Ts2 = np.zeros((n2x, n2y))
     Ns2 = np.zeros((n2x, n2y))
     for i in range(n2x):
         for j in range(n2y):
-            for l in range(N):
+            for l in range(int(N)):
                 if(L*j<xyz[l][0]<L*(j+1) and ((n2y-i)*L)<xyz[l][1]<((n2y-i+1)*L)):
                     Ns2[i][j] = Ns2[i][j] + 1
 
@@ -259,9 +257,12 @@ while k<k_max:
     Et = np.append(Et,sum(Energies))
     wvector = Energies/hbar
     
-    if(k>keq):
-        Tp = np.append(Tp,[Ts2],0)
-        
+    Tp = np.append(Tp,[Ts2],0)
+    
+    if(k==100):
+        np.save('Tp_dif100',Tp)
+    if(k==200):
+        np.save('Tp_dif200',Tp)
     times = times + dt
     k = k+1
     
