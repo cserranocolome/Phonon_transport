@@ -283,23 +283,11 @@ while k<k_max:
     Ns2 = np.array(Ns2)
     
     cel = xyz//L
-    N1prova = 0
-    N3prova = 0
-    for i in range(N):
-        if(cel[i]==(n2y+1)):
-            N1prova = N1prova + 1
-        if(cel[i]==0):
-            N3prova = N3prova + 1
     
     for j in range(n2y):
         Ns2[j] = Nvec[n2y-j]
         m = abs(Ntemp-Ns2[j])
         Ts2[j+1] = Temp[np.where(m == m.min())]
-        
-    m = abs(Ntemp-N1prova)        
-    print(Temp[np.where(m == m.min())])
-    m = abs(Ntemp-N3prova)        
-    print(Temp[np.where(m == m.min())])
     
     Ts2[n2y+1]=T3
     
